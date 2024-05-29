@@ -1,0 +1,47 @@
+body {
+    background-color: #eff2f7;
+}
+
+a{
+    background-color: #ccd5e5;
+    border-radius: 30px;
+    margin: 5px;
+    padding: 5px;
+}
+
+.container {
+    margin-top: 100px;
+}
+
+.form-control{
+    border-radius: 30px;
+}
+
+.form-group {
+    max-width: 500px;
+    margin: auto;
+    border-radius: 50px;
+}
+
+.right-float {
+    float: right;
+}
+
+
+#shortenedUrlContainer {
+    display: none;
+    background-color: #ffffff;
+    padding: 15px;
+    border-radius: 50px;
+    margin-top: 20px;
+
+}
+
+#shortenedUrlContainer p {
+    margin: 0;
+    word-break: break-all;
+}
+
+#copyButton {
+    margin-left: 10px;
+}
