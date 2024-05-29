@@ -22,7 +22,7 @@ func AddItem(dbConn *db.DBConnection, tableName string, key string) (string, err
 	if err != nil {
 		return "", err
 	}
-	generatedURL := "https://tiny-url.vercel.app/" + newValue
+	generatedURL := "https://tiny-url-nu.vercel.app/" + newValue
 	return generatedURL, nil
 }
 
