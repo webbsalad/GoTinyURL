@@ -35,10 +35,10 @@ func createApp() http.HandlerFunc {
 
 	app := fiber.New()
 
-	app.Static("/", "./templates")
+	app.Static("/", "../templates")
 
 	app.Get("/", func(c *fiber.Ctx) error {
-		return c.SendFile("./templates/index.html")
+		return c.SendFile("../templates/index.html")
 	})
 
 	app.Post("/shorten", func(c *fiber.Ctx) error {
