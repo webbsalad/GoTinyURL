@@ -35,10 +35,10 @@ func createApp() http.HandlerFunc {
 
 	app := fiber.New()
 
-	app.Static("/", "../templates")
+	app.Static("/", "./templates")
 
 	app.Get("/", func(c *fiber.Ctx) error {
-		return c.SendFile("../templates/index.html")
+		return c.SendFile("./templates/index.html")
 	})
 
 	app.Post("/shorten", func(c *fiber.Ctx) error {
@@ -94,6 +94,10 @@ func createApp() http.HandlerFunc {
 		originalURL, ok := result["key"]
 		if !ok {
 			return c.Status(fiber.StatusInternalServerError).SendString("URL key not found in JSON")
+		}
+
+		if originalURL == c.Hostname() {
+			return c.Status(fiber.StatusBadRequest).SendString("Cannot redirect to the same URL")
 		}
 
 		return c.Redirect(originalURL)
