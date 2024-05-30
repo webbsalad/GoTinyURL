@@ -1,44 +1,37 @@
-package handler
+package main
 
 import (
 	"encoding/base64"
 	"encoding/json"
 	"log"
-	"net/http"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/adaptor"
 	"github.com/skip2/go-qrcode"
 	"github.com/webbsalad/GoTinyURL/config"
 	"github.com/webbsalad/GoTinyURL/db"
 	"github.com/webbsalad/GoTinyURL/db/operations"
 )
 
-func Handler(w http.ResponseWriter, r *http.Request) {
-	r.RequestURI = r.URL.String()
-	createApp().ServeHTTP(w, r)
-}
-
-func createApp() http.HandlerFunc {
+func main() {
 	cfgDB, err := config.LoadConfig()
 	if err != nil {
 		log.Printf("Ошибка при чтении переменных окружения: %v\n", err)
-		return nil
+		return
 	}
 
 	database := db.DBConnection{Config: cfgDB}
 
 	if err := database.Connect(); err != nil {
 		log.Printf("Ошибка при подключении к PostgreSQL: %v\n", err)
-		return nil
+		return
 	}
 
 	app := fiber.New()
 
-	app.Static("/", "./public")
+	app.Static("/", "./templates")
 
 	app.Get("/", func(c *fiber.Ctx) error {
-		return c.SendFile("./public")
+		return c.SendFile("./templates/index.html")
 	})
 
 	app.Post("/shorten", func(c *fiber.Ctx) error {
@@ -96,12 +89,8 @@ func createApp() http.HandlerFunc {
 			return c.Status(fiber.StatusInternalServerError).SendString("URL key not found in JSON")
 		}
 
-		if originalURL == c.Hostname() {
-			return c.Status(fiber.StatusBadRequest).SendString("Cannot redirect to the same URL")
-		}
-
 		return c.Redirect(originalURL)
 	})
 
-	return adaptor.FiberApp(app)
+	app.Listen(":8080")
 }
