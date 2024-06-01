@@ -43,9 +43,9 @@
 ```json
 
 {
-    "rewrites": [
-      { "source": "(.*)", "destination": "api/index.go" }
-    ]
+    "rewrites": [
+        { "source": "(.*)", "destination": "api/index.go" }
+    ]
 }
 
 ```
