@@ -7,72 +7,84 @@
     <link rel="icon" type="image/png" href="logo.svg">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.2.1/dist/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
     <link href="styles.css" rel="stylesheet">
-    
 </head>
 <body>
-    <div class="container text-center">
-        <h1 class="mb-4">Сокращатель</h1>
-        <p class="mb-4">Помогает сокращать длинные ссылкии и получать qr коды</p>
+    <div class="container shortenedUrlContainer text-center">
+        <h1 class="mb-4">Сокращение ссылок и создание QR-кодов</h1>
+        <p class="mb-4">Вставьте длинную ссылку для сокращения или уже сокращенную ссылку, чтобы узнать количество переходов</p>
         <div class="form-group">
-            <input type="text" class="form-control" id="url" placeholder="Введите ссылку, которую нужно сократить">
+            <input type="text" class="form-control" id="url" placeholder="Введите ссылку">
         </div><br>
-        <button type="submit" class="btn btn-primary" onclick="shortenUrl()">Сократить</button>
+        <button type="submit" class="btn btn-primary" onclick="shortenUrl()">Подтвердить</button>
         <div id="shortenedUrlContainer" class="mt-4" style="display: none;">
-            <p>Сокращенная ссылка: <a href="#" id="shortenedUrl" target="_blank"></a></p><br>
-            <img id="qrCode" class=""src="" alt="QR Code">
-            <button id="copyButton" class="btn btn-secondary" onclick="copyToClipboard()">Скопировать ссылку</button><br><br>
+            <p>Результат: <a href="#" id="shortenedUrl" target="_blank"></a></p><br>
+            <img id="qrCode" class="" src="" alt="QR Code" style="display: none;">
+            <button id="copyButton" class="btn btn-secondary" onclick="copyToClipboard()" style="display: none;">Скопировать ссылку</button><br><br>
         </div>
     </div>
-
     <script>
         function shortenUrl() {
-        const url = document.getElementById('url').value;
-        if (isValidUrl(url)) {
-            fetch('/shorten', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ url: url })
-            })
-            .then(response => response.json())
-            .then(data => {
-                const shortenedUrlContainer = document.getElementById('shortenedUrlContainer');
-                const shortenedUrl = document.getElementById('shortenedUrl');
-                const qrCode = document.getElementById('qrCode');
-                
-                shortenedUrl.href = data.shortenedUrl;
-                shortenedUrl.textContent = data.shortenedUrl;
-                qrCode.src = data.qrCodeUrl;
-
-                shortenedUrlContainer.style.display = 'block';
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
-        } else {
-            alert('Введите корректный URL');
+            const url = document.getElementById('url').value;
+            if (isValidUrl(url)) {
+                fetch('/shorten', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ url: url })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    const shortenedUrlContainer = document.getElementById('shortenedUrlContainer');
+                    const shortenedUrl = document.getElementById('shortenedUrl');
+                    const qrCode = document.getElementById('qrCode');
+                    const copyButton = document.getElementById('copyButton');
+                    
+                    if (data.count) {
+                        shortenedUrl.textContent = `Количество переходов по этой ссылке: ${data.count}`;
+                        shortenedUrl.removeAttribute('href');
+                        qrCode.style.display = 'none';
+                        copyButton.style.display = 'none';
+                    } else {
+                        shortenedUrl.href = data.shortenedUrl;
+                        shortenedUrl.textContent = data.shortenedUrl;
+                        qrCode.src = data.qrCodeUrl;
+                        qrCode.style.display = 'block';
+                        copyButton.style.display = 'block';
+                    }
+    
+                    shortenedUrlContainer.style.display = 'block';
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+            } else {
+                alert('Введите корректный URL');
+            }
         }
-    }
-
-    function isValidUrl(url) {
-
-        return url.startsWith('http://') || url.startsWith('https://');
-    }
-
-    function copyToClipboard() {
-        const shortenedUrl = document.getElementById('shortenedUrl');
-        if (shortenedUrl.tagName.toLowerCase() === 'a') {
-            navigator.clipboard.writeText(shortenedUrl.href).then(() => {
-                console.log('URL copied to clipboard.');
-            }).catch(err => {
-                console.error('Error copying URL to clipboard:', err);
-            });
-        } else {
-            alert('This element is not a link.');
+    
+        function isValidUrl(url) {
+            try {
+                new URL(url);
+                return true;
+            } catch (_) {
+                return false;
+            }
         }
-    }
-
+    
+        function copyToClipboard() {
+            const shortenedUrl = document.getElementById('shortenedUrl');
+            if (shortenedUrl.tagName.toLowerCase() === 'a') {
+                navigator.clipboard.writeText(shortenedUrl.href).then(() => {
+                    console.log('URL copied to clipboard.');
+                }).catch(err => {
+                    console.error('Error copying URL to clipboard:', err);
+                });
+            } else {
+                alert('This element is not a link.');
+            }
+        }
     </script>
+    
 </body>
 </html>

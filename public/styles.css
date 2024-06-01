@@ -29,12 +29,14 @@ a{
 
 
 #shortenedUrlContainer {
+    justify-content: center;
+    align-items: center;
+    text-align: center;
     display: none;
     background-color: #ffffff;
     padding: 15px;
     border-radius: 50px;
     margin-top: 20px;
-
 }
 
 #shortenedUrlContainer p {
@@ -43,5 +45,18 @@ a{
 }
 
 #copyButton {
-    margin-left: 10px;
+    margin: 10px auto; 
+    display: block; 
+}
+
+#qrCode {
+    display: block; 
+    margin: 0 auto 10px; 
+}
+
+@media (max-width: 576px) {
+    #shortenedUrl {
+        display: block;
+        word-break: break-all; 
+    }
 }

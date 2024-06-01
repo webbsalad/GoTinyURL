@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"net/url"
+	"strings"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/adaptor"
@@ -38,7 +40,7 @@ func createApp() http.HandlerFunc {
 	app.Static("/", "./public")
 
 	app.Get("/", func(c *fiber.Ctx) error {
-		return c.SendFile("./public")
+		return c.SendFile("./public/index.html")
 	})
 
 	app.Post("/shorten", func(c *fiber.Ctx) error {
@@ -49,6 +51,48 @@ func createApp() http.HandlerFunc {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 				"error": "cannot parse JSON",
 			})
+		}
+
+		parsedUrl, err := url.Parse(request.URL)
+		if err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"error": "invalid URL",
+			})
+		}
+
+		currentHost := c.Hostname()
+
+		if parsedUrl.Host == currentHost {
+
+			searchValue := strings.TrimPrefix(parsedUrl.Path, "/")
+
+			count, err := operations.FetchCountByValue(&database, "urls", searchValue)
+			if err != nil {
+				return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+					"error": "failed to fetch count by value",
+				})
+			}
+
+			response := struct {
+				Count string `json:"count"`
+			}{
+				Count: count,
+			}
+
+			return c.JSON(response)
+		}
+
+		existingCount, err := operations.FetchCountByOriginalURL(&database, "urls", request.URL)
+		if err == nil {
+			response := struct {
+				OriginalURL string `json:"originalUrl"`
+				Count       string `json:"count"`
+			}{
+				OriginalURL: request.URL,
+				Count:       existingCount,
+			}
+
+			return c.JSON(response)
 		}
 
 		shortenedURL, err := operations.AddItem(&database, "urls", request.URL)

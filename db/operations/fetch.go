@@ -34,16 +34,23 @@ func FetchKeyByValue(dbConn *db.DBConnection, tableName string, searchValue stri
 func FetchCountByValue(dbConn *db.DBConnection, tableName string, searchValue string) (string, error) {
 	querySelect := fmt.Sprintf(`SELECT count FROM "%s" WHERE value = $1`, tableName)
 	row := dbConn.Conn.QueryRow(context.Background(), querySelect, searchValue)
+	var count int
+	err := row.Scan(&count)
+	if err != nil {
+		return "", err
+	}
+
+	return fmt.Sprintf("%d", count), nil
+}
+
+func FetchCountByOriginalURL(dbConn *db.DBConnection, tableName string, originalURL string) (string, error) {
+	querySelect := fmt.Sprintf(`SELECT count FROM "%s" WHERE value = $1`, tableName)
+	row := dbConn.Conn.QueryRow(context.Background(), querySelect, originalURL)
 	var count string
 	err := row.Scan(&count)
 	if err != nil {
 		return "", err
 	}
 
-	jsonData, err := json.Marshal(map[string]string{"count": count})
-	if err != nil {
-		return "", err
-	}
-
-	return string(jsonData), nil
+	return count, nil
 }
